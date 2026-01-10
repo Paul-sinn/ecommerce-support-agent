@@ -1,0 +1,33 @@
+[project]
+name = "project-1"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # --- Core AI / Agent ---
+    "langgraph",
+    "langchain",
+    "langchain-openai",
+    "openai",
+
+    # --- Backend API ---
+    "fastapi",
+    "uvicorn",
+
+    # --- Data / DB ---
+    "sqlalchemy",
+
+    # --- Environment & Config ---
+    "python-dotenv",
+
+    # --- Validation / Models ---
+    "pydantic",
+
+    # --- HTTP / Utils ---
+    "httpx",
+
+    "langgraph-cli[inmem]==0.4.0",
+
+]
+

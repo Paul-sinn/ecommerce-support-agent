@@ -1,0 +1,20 @@
+{
+  "dependencies": [
+    "main.py",
+    "graph/state.py",
+    "graph/workflow.py",
+    "graph/policy_store.py",
+    "graph/business_policy_store.py",
+    "graph/nodes/triage_router.py",
+    "graph/nodes/policy_scope_guard.py",
+    "graph/nodes/policy_completeness_guard.py",
+    "graph/nodes/policy_risk_guard.py",
+    "graph/nodes/order_agent.py",
+    "graph/nodes/billing_agent.py",
+    "graph/llm/client.py"
+  ],
+  "graphs": {
+    "csbot": "./main.py:graphs"
+  },
+  "env": "./env"
+}
