@@ -1,12 +1,23 @@
 from ..state import GraphState
-from llm.client import get_llm_by_priority
+from graph.llm.client import get_llm_by_priority
 from ..business_policy_store import BUSINESS_POLICIES
 
-def order_agent(state: GraphState):
-    inquiry = state["inquiry"]
-    priority = state["priority"]
+def _latest_user_text(messages):
+    for msg in reversed(messages or []):
+        if isinstance(msg, dict):
+            role = msg.get("role") or msg.get("type")
+            if role in {"user", "human"}:
+                return msg.get("content", "")
+        else:
+            role = getattr(msg, "type", None)
+            if role in {"user", "human"}:
+                return getattr(msg, "content", "")
+    return ""
 
-    assert priority is not None, "order_agent called before triage/policy"
+
+def order_agent(state: GraphState):
+    inquiry = _latest_user_text(state.get("messages"))
+    priority = state["priority"]
 
     llm = get_llm_by_priority(priority)
 

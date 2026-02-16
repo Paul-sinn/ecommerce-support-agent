@@ -5,8 +5,21 @@ from ..llm.client import get_triage_llm
 
 llm = get_triage_llm()
 
+def _latest_user_text(messages):
+    for msg in reversed(messages or []):
+        if isinstance(msg, dict):
+            role = msg.get("role") or msg.get("type")
+            if role in {"user", "human"}:
+                return msg.get("content", "")
+        else:
+            role = getattr(msg, "type", None)
+            if role in {"user", "human"}:
+                return getattr(msg, "content", "")
+    return ""
+
+
 def triage_router(state: GraphState):
-    inquiry = state["inquiry"]
+    inquiry = _latest_user_text(state.get("messages"))
     
     prompt = f"""
             You are a triage agent for an e-commerce customer support system.

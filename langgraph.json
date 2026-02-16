@@ -1,5 +1,6 @@
 {
   "dependencies": [
+    "langchain_openai",
     "main.py",
     "graph/state.py",
     "graph/workflow.py",
@@ -16,5 +17,5 @@
   "graphs": {
     "csbot": "./main.py:graphs"
   },
-  "env": "./env"
+  "env": "./.env"
 }

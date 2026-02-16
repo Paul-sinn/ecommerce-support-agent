@@ -1,11 +1,8 @@
-from langgraph.graph import StateGraph
-from langchain.chat_models import init_chat_model
-from typing import List, Optional, TypedDict
-
-llm = init_chat_model("openai:gpt-4o")
+from typing import Annotated, List, Optional, TypedDict
+from langgraph.graph.message import add_messages
 
 class GraphState(TypedDict):
-    inquiry: str
+    messages: Annotated[list, add_messages]
 
     # triage 결과
     category: Optional[str]
@@ -21,4 +18,3 @@ class GraphState(TypedDict):
 
     # 최종 응답
     final_reply: Optional[str]
-

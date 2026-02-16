@@ -7,10 +7,6 @@ def policy_risk_guard(state: GraphState):
     category = state["category"]
     priority = state["priority"]
 
-    # triage 이후라는 계약
-    assert category is not None, "policy_risk_guard called before triage"
-    assert priority is not None, "policy_risk_guard called before triage"
-
     # 기본값
     risk_level = "LOW"
 

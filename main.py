@@ -1,3 +1,4 @@
+#Test file for main.py
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -62,3 +63,11 @@ graph.add_edge("billing_agent", END)
 
 # 최종 컴파일
 graphs = graph.compile()
+
+if __name__ == "__main__":
+    result = graphs.invoke({
+        "messages": "do you remember what i asked u before?",
+    })
+
+    print("=== RESULT ===")
+    print(result)

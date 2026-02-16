@@ -5,11 +5,11 @@ from langchain.chat_models import init_chat_model
 # LLM registry (singleton instances)
 _LLM_REGISTRY = {
     "low": init_chat_model(
-        "openai:gpt-3.5o",
+        "openai:gpt-3.5-turbo-0125",
         temperature=0
     ),
     "medium": init_chat_model(
-        "openai:gpt-3.5turbo",
+        "openai:gpt-3.5-turbo-0125",
         temperature=0
     ),
     "high": init_chat_model(
