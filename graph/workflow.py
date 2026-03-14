@@ -41,7 +41,7 @@ graph.add_node("order_agent", order_agent)
 graph.add_node("billing_agent", billing_agent)
 
 
-graph.set_entry_point("triage")
+graph.add_edge(START, "triage")
 
 graph.add_edge("triage", "policy_scope")
 graph.add_edge("policy_scope", "policy_completeness")

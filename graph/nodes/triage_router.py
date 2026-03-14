@@ -5,21 +5,37 @@ from ..llm.client import get_triage_llm
 
 llm = get_triage_llm()
 
+def _message_role_and_content(msg):
+    if isinstance(msg, dict):
+        role = msg.get("role") or msg.get("type")
+        content = msg.get("content", "")
+        return role, content
+    role = getattr(msg, "type", None) or getattr(msg, "role", None)
+    content = getattr(msg, "content", "")
+    return role, content
+
+
 def _latest_user_text(messages):
     for msg in reversed(messages or []):
-        if isinstance(msg, dict):
-            role = msg.get("role") or msg.get("type")
-            if role in {"user", "human"}:
-                return msg.get("content", "")
-        else:
-            role = getattr(msg, "type", None)
-            if role in {"user", "human"}:
-                return getattr(msg, "content", "")
+        role, content = _message_role_and_content(msg)
+        if role in {"user", "human"}:
+            return content
     return ""
+
+def _recent_conversation_text(messages, limit=8):
+    rows = []
+    for msg in (messages or [])[-limit:]:
+        role, content = _message_role_and_content(msg)
+        if role in {"user", "human"}:
+            rows.append(f"USER: {content}")
+        elif role in {"assistant", "ai"}:
+            rows.append(f"ASSISTANT: {content}")
+    return "\n".join(rows)
 
 
 def triage_router(state: GraphState):
     inquiry = _latest_user_text(state.get("messages"))
+    conversation = _recent_conversation_text(state.get("messages"))
     
     prompt = f"""
             You are a triage agent for an e-commerce customer support system.
@@ -33,6 +49,7 @@ def triage_router(state: GraphState):
     - missing_fields
 
     Follow these rules strictly:
+    - Say hello to the user When the user is the first message.
     - Do NOT explain policies.
     - Do NOT reject or approve requests.
     - Do NOT generate customer-facing responses.
@@ -57,6 +74,9 @@ def triage_router(state: GraphState):
 
     Customer inquiry:
     "{inquiry}"
+
+    Recent conversation context:
+    {conversation}
 
     Return JSON in this format:
     {{

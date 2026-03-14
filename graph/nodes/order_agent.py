@@ -2,21 +2,37 @@ from ..state import GraphState
 from graph.llm.client import get_llm_by_priority
 from ..business_policy_store import BUSINESS_POLICIES
 
+def _message_role_and_content(msg):
+    if isinstance(msg, dict):
+        role = msg.get("role") or msg.get("type")
+        content = msg.get("content", "")
+        return role, content
+    role = getattr(msg, "type", None) or getattr(msg, "role", None)
+    content = getattr(msg, "content", "")
+    return role, content
+
+
 def _latest_user_text(messages):
     for msg in reversed(messages or []):
-        if isinstance(msg, dict):
-            role = msg.get("role") or msg.get("type")
-            if role in {"user", "human"}:
-                return msg.get("content", "")
-        else:
-            role = getattr(msg, "type", None)
-            if role in {"user", "human"}:
-                return getattr(msg, "content", "")
+        role, content = _message_role_and_content(msg)
+        if role in {"user", "human"}:
+            return content
     return ""
+
+def _recent_conversation_text(messages, limit=8):
+    rows = []
+    for msg in (messages or [])[-limit:]:
+        role, content = _message_role_and_content(msg)
+        if role in {"user", "human"}:
+            rows.append(f"USER: {content}")
+        elif role in {"assistant", "ai"}:
+            rows.append(f"ASSISTANT: {content}")
+    return "\n".join(rows)
 
 
 def order_agent(state: GraphState):
     inquiry = _latest_user_text(state.get("messages"))
+    conversation = _recent_conversation_text(state.get("messages"))
     priority = state["priority"]
 
     llm = get_llm_by_priority(priority)
@@ -42,6 +58,9 @@ Rules:
 
 Customer inquiry:
 "{inquiry}"
+
+Recent conversation context:
+{conversation}
 """
 
     response = llm.invoke(prompt)

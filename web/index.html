@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeoMall</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/web/styles.css" />
+  </head>
+  <body>
+    <main class="layout">
+      <section class="store">
+        <header class="hero">
+          <h1>NeoMall Spring Drop</h1>
+          <p>가짜 쇼핑몰 UI + 우측 고객지원 챗봇 테스트 페이지</p>
+          <div class="chips">
+            <span>Fast Shipping</span>
+            <span>7-Day Refund</span>
+            <span>24/7 Support</span>
+          </div>
+        </header>
+
+        <h2>Featured Products</h2>
+        <div id="product-grid" class="product-grid"></div>
+
+        <h2>Cart</h2>
+        <ul id="cart-list" class="cart-list"></ul>
+        <p id="cart-total" class="cart-total">Total: $0.00</p>
+      </section>
+
+      <aside class="support">
+        <div class="support-header">
+          <h2>고객지원 챗봇</h2>
+          <p>Order/Billing 멀티턴 테스트</p>
+          <code id="thread-id"></code>
+          <div class="actions">
+            <button id="new-chat">New Chat</button>
+            <button id="clear-ui">Clear UI</button>
+          </div>
+        </div>
+
+        <div id="chat-log" class="chat-log"></div>
+
+        <form id="chat-form" class="chat-form">
+          <input id="chat-input" type="text" placeholder="배송/환불/결제 관련 질문 입력" required />
+          <button type="submit">Send</button>
+        </form>
+      </aside>
+    </main>
+
+    <script src="/web/app.js" defer></script>
+  </body>
+</html>

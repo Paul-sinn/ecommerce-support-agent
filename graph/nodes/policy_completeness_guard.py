@@ -1,7 +1,11 @@
 from ..state import GraphState
 
 def policy_completeness_guard(state: GraphState):
-    missing_fields = state["missing_fields"]
+    # scope에서 이미 막혔으면 그대로 전달 (인사 등 → OUT_OF_SCOPE 메시지 유지)
+    if state.get("policy_status") == "OUT_OF_SCOPE":
+        return {}
+
+    missing_fields = state.get("missing_fields") or []
 
     if len(missing_fields) > 0:
         return {
