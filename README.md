@@ -1,7 +1,7 @@
 # ecommerce-support-agent
 A multi-agent AI customer support system for e-commerce with policy guardrails, intent routing, and workflow-based agent orchestration.
 
-#**Ecommerce Support Agent**
+# **Ecommerce Support Agent**
 
 A multi-agent AI customer support system for e-commerce that filters requests through policy guardrails and routes them to specialized agents using a workflow-based architecture.
 
