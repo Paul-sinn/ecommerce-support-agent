@@ -7,7 +7,7 @@ A multi-agent AI customer support system for e-commerce that filters requests th
 
 This project demonstrates how customer inquiries can be processed through a structured pipeline that enforces store policies, evaluates request scope and risk, and routes the request to the appropriate support agent.
 
-#**Architecture**
+# **Architecture**
 
 The system processes user requests through multiple stages before delegating them to specialized agents.
 
@@ -34,7 +34,7 @@ Order Agent – handles order status, shipping, and purchase-related requests
 
 If a request fails policy validation or is outside scope, the workflow terminates early.
 
-#**System Flow**
+# **System Flow**
 
 User Message
      ↓
@@ -56,7 +56,7 @@ Billing     Order
 
 
 
-#**Features**
+# **Features**
 
 Multi-agent architecture
 
@@ -68,7 +68,7 @@ Specialized agents for different support tasks
 
 Modular design for easy extension
 
-#**Example Use Cases**
+# **Example Use Cases**
 
 Customer messages like:
 
@@ -88,7 +88,7 @@ evaluates risk
 
 routes the request to the correct support agent
 
-#**Tech Stack**
+# **Tech Stack**
 
 Python
 
@@ -118,6 +118,6 @@ Conversation memory
 
 Full ecommerce backend integration
 
-#**Purpose**
+# **Purpose**
 
 This project demonstrates how AI agent workflows can be applied to real-world customer support automation in e-commerce systems.
