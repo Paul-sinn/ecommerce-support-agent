@@ -2,6 +2,7 @@
   "dependencies": [
     "langchain_openai",
     "main.py",
+    "lang_cli.py",
     "graph/state.py",
     "graph/workflow.py",
     "graph/policy_store.py",
@@ -15,7 +16,7 @@
     "graph/llm/client.py"
   ],
   "graphs": {
-    "csbot": "./main.py:graphs"
+    "csbot": "./lang_cli.py:graphs"
   },
   "env": "./.env"
 }

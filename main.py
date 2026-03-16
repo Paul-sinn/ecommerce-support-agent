@@ -64,44 +64,44 @@ graph.add_edge("billing_agent", END)
 # 최종 컴파일 — 체크포인터 있어야 같은 thread_id로 대화가 이어짐
 graphs = graph.compile(checkpointer=MemorySaver())
 
-# 터미널에서 연속 대화할 때 쓰는 thread_id (같은 ID면 이전 메시지 유지)
-THREAD_ID = "main-cli"
+# # 터미널에서 연속 대화할 때 쓰는 thread_id (같은 ID면 이전 메시지 유지)
+# THREAD_ID = "main-cli"
 
-if __name__ == "__main__":
-    config = {"configurable": {"thread_id": THREAD_ID}}
+# if __name__ == "__main__":
+#     config = {"configurable": {"thread_id": THREAD_ID}}
 
-    print("대화를 시작합니다. 종료하려면 빈 줄에서 Enter 또는 Ctrl+C")
-    print("-" * 50)
+#     print("대화를 시작합니다. 종료하려면 빈 줄에서 Enter 또는 Ctrl+C")
+#     print("-" * 50)
 
-    while True:
-        try:
-            line = input("You: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\n종료합니다.")
-            break
-        if not line:
-            break
+#     while True:
+#         try:
+#             line = input("You: ").strip()
+#         except (KeyboardInterrupt, EOFError):
+#             print("\n종료합니다.")
+#             break
+#         if not line:
+#             break
 
-        result = graphs.invoke(
-            {"messages": [{"role": "user", "content": line}]},
-            config=config,
-        )
+#         result = graphs.invoke(
+#             {"messages": [{"role": "user", "content": line}]},
+#             config=config,
+#         )
 
-        # 디버깅: 응답이 어떤 에이전트/정책에서 나왔는지 표시
-        category = result.get("category")
-        policy_status = result.get("policy_status")
-        if result.get("final_reply"):
-            source = "order_agent" if category == "order" else "billing_agent" if category == "billing" else "agent"
-        elif policy_status == "OUT_OF_SCOPE":
-            source = "policy_scope_guard"
-        elif policy_status == "NEED_MORE_INFO":
-            source = "policy_completeness_guard"
-        else:
-            source = "end (no agent)"
-        print(f"[{source}] category={category!r} policy_status={policy_status!r}")
+#         # 디버깅: 응답이 어떤 에이전트/정책에서 나왔는지 표시
+#         category = result.get("category")
+#         policy_status = result.get("policy_status")
+#         if result.get("final_reply"):
+#             source = "order_agent" if category == "order" else "billing_agent" if category == "billing" else "agent"
+#         elif policy_status == "OUT_OF_SCOPE":
+#             source = "policy_scope_guard"
+#         elif policy_status == "NEED_MORE_INFO":
+#             source = "policy_completeness_guard"
+#         else:
+#             source = "end (no agent)"
+#         print(f"[{source}] category={category!r} policy_status={policy_status!r}")
 
-        reply = result.get("final_reply") or result.get("policy_message")
-        if not reply:
-            reply = "(응답 없음)"
-        print("Bot:", reply)
-        print("-" * 50)
+#         reply = result.get("final_reply") or result.get("policy_message")
+#         if not reply:
+#             reply = "(응답 없음)"
+#         print("Bot:", reply)
+#         print("-" * 50)
