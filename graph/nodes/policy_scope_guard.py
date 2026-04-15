@@ -16,6 +16,7 @@ def policy_scope_guard(state: GraphState):
         return {
             "policy_status": "OUT_OF_SCOPE",
             "policy_message": OUT_OF_SCOPE_FRIENDLY,
+            "messages": [{"role": "assistant", "content": OUT_OF_SCOPE_FRIENDLY}],
         }
 
     return {
