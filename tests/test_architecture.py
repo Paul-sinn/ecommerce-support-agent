@@ -1,9 +1,9 @@
 import unittest
 
-from main import route_to_agent
 from graph.nodes.policy_completeness_guard import policy_completeness_guard
 from graph.nodes.policy_risk_guard import policy_risk_guard
 from graph.nodes.policy_scope_guard import policy_scope_guard
+from graph.workflow import build_graph, route_to_agent
 
 
 class ArchitectureTests(unittest.TestCase):
@@ -19,9 +19,9 @@ class ArchitectureTests(unittest.TestCase):
         state = {"policy_status": "VALID", "category": "billing"}
         self.assertEqual(route_to_agent(state), "billing_agent")
 
-    def test_route_to_agent_ends_for_unknown_category(self):
+    def test_route_to_agent_routes_to_fallback_for_unknown_category(self):
         state = {"policy_status": "VALID", "category": "unknown"}
-        self.assertEqual(route_to_agent(state), "end")
+        self.assertEqual(route_to_agent(state), "fallback_agent")
 
     def test_policy_scope_guard_blocks_unknown_category(self):
         result = policy_scope_guard({"category": "unknown"})
@@ -34,7 +34,7 @@ class ArchitectureTests(unittest.TestCase):
     def test_policy_completeness_guard_blocks_when_fields_missing(self):
         result = policy_completeness_guard({"missing_fields": ["order_id", "email"]})
         self.assertEqual(result["policy_status"], "NEED_MORE_INFO")
-        self.assertIn("order_id", result["policy_message"])
+        self.assertIn("주문번호", result["policy_message"])
 
     def test_policy_completeness_guard_allows_complete_request(self):
         result = policy_completeness_guard({"missing_fields": []})
@@ -43,10 +43,16 @@ class ArchitectureTests(unittest.TestCase):
     def test_policy_risk_guard_high_for_high_priority_billing(self):
         result = policy_risk_guard({"category": "billing", "priority": "high"})
         self.assertEqual(result["policy_risk_level"], "HIGH")
+        self.assertTrue(result["escalation_required"])
 
     def test_policy_risk_guard_low_otherwise(self):
         result = policy_risk_guard({"category": "order", "priority": "medium"})
         self.assertEqual(result["policy_risk_level"], "LOW")
+        self.assertFalse(result["escalation_required"])
+
+    def test_build_graph_contains_expected_nodes(self):
+        graph = build_graph()
+        self.assertIsNotNone(graph)
 
 
 if __name__ == "__main__":
