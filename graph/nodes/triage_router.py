@@ -1,9 +1,87 @@
 import json
-from langchain.chat_models import init_chat_model
-from ..state import GraphState
-from ..llm.client import get_triage_llm
 
-llm = get_triage_llm()
+from ..llm.client import get_triage_llm
+from ..state import GraphState
+
+ALLOWED_CATEGORIES = {"order", "billing", "account", "technical", "unknown"}
+ALLOWED_PRIORITIES = {"low", "medium", "high"}
+
+
+def _safe_json_loads(raw_content: str):
+    try:
+        return json.loads(raw_content)
+    except json.JSONDecodeError:
+        start = raw_content.find("{")
+        end = raw_content.rfind("}")
+        if start != -1 and end != -1 and start < end:
+            try:
+                return json.loads(raw_content[start : end + 1])
+            except json.JSONDecodeError:
+                return None
+        return None
+
+
+def _fallback_triage(inquiry: str) -> dict:
+    text = (inquiry or "").lower()
+    category = "unknown"
+    priority = "medium"
+    missing_fields = []
+
+    ORDER_KEYWORDS = {"order", "delivery", "shipping", "cancel", "return",
+                      "주문", "배송", "취소", "반품", "교환", "배달"}
+    BILLING_KEYWORDS = {"refund", "payment", "charge", "invoice", "billing",
+                        "환불", "결제", "청구", "쿠폰", "중복", "이중"}
+
+    if any(keyword in text for keyword in ORDER_KEYWORDS):
+        category = "order"
+        if "ord-" not in text and not any(k in text for k in {"주문번호", "ord"}):
+            missing_fields.append("order_id")
+    elif any(keyword in text for keyword in BILLING_KEYWORDS):
+        category = "billing"
+        if "pay-" not in text and not any(k in text for k in {"결제번호", "pay"}):
+            missing_fields.append("payment_id")
+
+    HIGH_KEYWORDS = {"charged twice", "duplicate", "payment failed", "missing order", "system error",
+                     "이중결제", "중복결제", "결제실패", "주문누락"}
+    MEDIUM_KEYWORDS = {"refund", "shipping delay", "cancel", "return",
+                       "환불", "배송지연", "취소", "반품"}
+
+    if any(keyword in text for keyword in HIGH_KEYWORDS):
+        priority = "high"
+    elif any(keyword in text for keyword in MEDIUM_KEYWORDS):
+        priority = "medium"
+    else:
+        priority = "low" if category == "unknown" else priority
+
+    return {
+        "category": category,
+        "priority": priority,
+        "missing_fields": missing_fields,
+    }
+
+
+def _normalize_result(result: dict | None, inquiry: str) -> dict:
+    fallback = _fallback_triage(inquiry)
+    if not isinstance(result, dict):
+        return fallback
+
+    category = result.get("category")
+    priority = result.get("priority")
+    missing_fields = result.get("missing_fields")
+
+    if category not in ALLOWED_CATEGORIES:
+        category = fallback["category"]
+    if priority not in ALLOWED_PRIORITIES:
+        priority = fallback["priority"]
+    if not isinstance(missing_fields, list):
+        missing_fields = fallback["missing_fields"]
+
+    return {
+        "category": category,
+        "priority": priority,
+        "missing_fields": [str(field) for field in missing_fields],
+    }
+
 
 def _message_role_and_content(msg):
     if isinstance(msg, dict):
@@ -22,6 +100,7 @@ def _latest_user_text(messages):
             return content
     return ""
 
+
 def _recent_conversation_text(messages, limit=8):
     rows = []
     for msg in (messages or [])[-limit:]:
@@ -34,9 +113,10 @@ def _recent_conversation_text(messages, limit=8):
 
 
 def triage_router(state: GraphState):
+    llm = get_triage_llm()
     inquiry = _latest_user_text(state.get("messages"))
     conversation = _recent_conversation_text(state.get("messages"))
-    
+
     prompt = f"""
             You are a triage agent for an e-commerce customer support system.
 
@@ -49,7 +129,6 @@ def triage_router(state: GraphState):
     - missing_fields
 
     Follow these rules strictly:
-    - Say hello to the user When the user is the first message.
     - Do NOT explain policies.
     - Do NOT reject or approve requests.
     - Do NOT generate customer-facing responses.
@@ -87,7 +166,7 @@ def triage_router(state: GraphState):
     """
 
     response = llm.invoke(prompt)
-    result = json.loads(response.content)
+    result = _normalize_result(_safe_json_loads(response.content), inquiry)
 
     return {
         "category": result["category"],

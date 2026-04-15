@@ -25,6 +25,10 @@ def route_to_agent(state: GraphState) -> str:
     return "fallback_agent"
 
 
+def route_to_ticket(state: GraphState) -> str:
+    return "ticket_writer" if state.get("eligible") else "end"
+
+
 def build_graph() -> StateGraph:
     graph = StateGraph(GraphState)
 
@@ -51,8 +55,16 @@ def build_graph() -> StateGraph:
             "end": END,
         },
     )
-    graph.add_edge("order_agent", "ticket_writer")
-    graph.add_edge("billing_agent", "ticket_writer")
+    graph.add_conditional_edges(
+        "order_agent",
+        route_to_ticket,
+        {"ticket_writer": "ticket_writer", "end": END},
+    )
+    graph.add_conditional_edges(
+        "billing_agent",
+        route_to_ticket,
+        {"ticket_writer": "ticket_writer", "end": END},
+    )
     graph.add_edge("ticket_writer", END)
     graph.add_edge("fallback_agent", END)
     return graph

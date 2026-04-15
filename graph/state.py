@@ -20,6 +20,9 @@ class GraphState(TypedDict):
     escalation_required: Optional[bool]
     error_code: Optional[str]
 
+    # 에이전트 policy 적합 판정
+    eligible: Optional[bool]
+
     # 최종 응답
     final_reply: Optional[str]
     ticket_id: Optional[int]
